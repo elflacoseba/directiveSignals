@@ -1,4 +1,4 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, effect, signal } from '@angular/core';
 import { User } from '../../interfaces/user-request.interface';
 
 @Component({
@@ -7,6 +7,8 @@ import { User } from '../../interfaces/user-request.interface';
   host: {'collision-id': 'PropertiesPageComponent'},
 })
 export class PropertiesPageComponent {
+
+  public counter = signal(10);
 
   public user = signal<User>({
     id: 1,
@@ -18,7 +20,11 @@ export class PropertiesPageComponent {
 
   public fullName = computed( () => `${ this.user().first_name} ${ this.user().last_name}` );
 
-  public onFieldUpdated(field: keyof User, value: any): void {
+  public userChangedEffect = effect( () => {
+    console.log( `${ this.user().first_name } - ${ this.counter() }` );
+  } );
+
+  public onFieldUpdated(field: keyof User, value: string) {
     // this.user.set({
     //   ...this.user(),
     //   [field]: value,
@@ -29,28 +35,33 @@ export class PropertiesPageComponent {
     //   [field]: value
     // }) );
 
-    this.user.update( current => {
+    this.user.update( (current) => {
+
+      var newUser = {...current};
 
       switch(field) {
         case 'email':
-          current.email = value;
+          newUser.email = value;
           break;
         case 'avatar':
-          current.avatar = value;
+          newUser.avatar = value;
           break;
         case 'first_name':
-          current.first_name = value;
+          newUser.first_name = value;
           break;
         case 'last_name':
-          current.last_name = value;
+          newUser.last_name = value;
           break;
         case 'id':
-          current.id = Number( value );
+          newUser.id = Number( value );
       }
 
-      return current;
+      return newUser ;
     } );
   }
 
+  public increaseBy( value: number ) {
+    this.counter.update( current => current + value );
+  }
 }
 
